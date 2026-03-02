@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ito</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(135deg, #8b6f47 0%, #d4a574 50%, #8b6f47 100%);
+      background-image: 
+        linear-gradient(90deg, rgba(0,0,0,.03) 1px, transparent 1px),
+        linear-gradient(rgba(0,0,0,.03) 1px, transparent 1px),
+        linear-gradient(135deg, #8b6f47 0%, #d4a574 50%, #8b6f47 100%);
+      background-size: 50px 50px, 50px 50px, 100% 100%;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .screen {
+      display: none;
+      background: #f5f5dc;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 500px;
+      margin: 0 auto;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.3);
+      border: 3px solid #8b6f47;
+    }
+    .screen.active { display: block; }
+    h1 { 
+      font-size: 32px; 
+      margin-bottom: 24px; 
+      text-align: center; 
+      color: #5d4e37;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+      font-weight: bold;
+    }
+    h2 { font-size: 18px; margin-bottom: 16px; color: #5d4e37; }
+    input, textarea, select {
+      width: 100%;
+      padding: 16px;
+      font-size: 16px;
+      border: 2px solid #8b6f47;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: white;
+    }
+    textarea { min-height: 100px; resize: vertical; }
+    label { display: block; margin-bottom: 8px; color: #5d4e37; font-weight: 500; }
+    button {
+      width: 100%;
+      padding: 18px;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 12px;
+      transition: transform 0.1s;
+    }
+    button:active { transform: scale(0.98); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { 
+      background: linear-gradient(135deg, #8b6f47 0%, #a0826d 100%); 
+      color: white; 
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .btn-secondary { background: #d4a574; color: #5d4e37; }
+    .btn-danger { background: #d32f2f; color: white; }
+    .btn-small { 
+      padding: 10px 16px; 
+      font-size: 14px; 
+      width: auto; 
+      display: inline-block; 
+      margin: 4px; 
+    }
+    .player-item {
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      border: 2px solid #d4a574;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .player-item:hover { background: #fff8e1; }
+    .card-item { 
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      border: 2px solid #d4a574;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .card-info { flex: 1; }
+    .player-icon { font-size: 24px; margin-right: 8px; }
+    .host-badge { 
+      background: #ffd700; 
+      color: #333; 
+      padding: 4px 8px; 
+      border-radius: 4px; 
+      font-size: 12px; 
+      margin-left: 8px; 
+    }
+    .my-card {
+      background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+      color: white;
+      padding: 32px;
+      border-radius: 12px;
+      text-align: center;
+      margin: 24px 0;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+    }
+    .my-card-number { font-size: 48px; font-weight: bold; }
+    .card-number { font-size: 24px; font-weight: bold; color: #8b6f47; }
+    .card-answer { margin-top: 8px; color: #666; }
+    .hearts-container { 
+      text-align: left; 
+      margin: 16px 0; 
+      padding: 16px;
+      background: white;
+      border-radius: 8px;
+      border: 2px solid #d4a574;
+    }
+    .hearts-label { font-size: 14px; color: #5d4e37; margin-bottom: 8px; font-weight: bold; }
+    .hearts { font-size: 32px; letter-spacing: 4px; }
+    .theme-display {
+      background: white;
+      border: 3px solid #8b6f47;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .theme-display strong { font-size: 20px; color: #5d4e37; }
+    .info-box {
+      background: #fff8e1;
+      border-left: 4px solid #8b6f47;
+      padding: 12px;
+      margin: 16px 0;
+      border-radius: 4px;
+      font-size: 14px;
+      color: #5d4e37;
+    }
+    .result-message { 
+      text-align: center; 
+      font-size: 64px; 
+      margin: 40px 0; 
+      font-weight: bold;
+      text-shadow: 3px 3px 6px rgba(0,0,0,0.2);
+    }
+    .result-message.clear { color: #4caf50; }
+    .result-message.fail { color: #f44336; }
+    .fixed-back { 
+      position: fixed; 
+      bottom: 20px; 
+      left: 20px; 
+      padding: 12px 20px; 
+      background: rgba(139,111,71,0.9); 
+      color: white; 
+      border: 2px solid #5d4e37;
+      border-radius: 8px; 
+      cursor: pointer; 
+      z-index: 1000; 
+      width: auto;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    .opening-card-row {
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      border: 2px solid #d4a574;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .opening-card-left {
+      display: flex;
+      align-items: center;
+      min-width: 120px;
+    }
+    .opening-card-center {
+      flex: 1;
+      font-size: 16px;
+      color: #333;
+    }
+    .opening-card-right {
+      min-width: 60px;
+      text-align: center;
+    }
+    .number-display {
+      font-size: 28px;
+      font-weight: bold;
+      color: #8b6f47;
+      width: 60px;
+      text-align: center;
+    }
+    .question-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #8b6f47 0%, #a0826d 100%);
+      color: white;
+      font-size: 32px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      transition: transform 0.1s;
+    }
+    .question-btn:active { transform: scale(0.95); }
+    .question-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .wait-message {
+      text-align: center;
+      color: #5d4e37;
+      padding: 40px 20px;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+<div id="enter" class="screen active">
+  <h1>ito</h1>
+  <label>部屋ID (4桁)</label>
+  <input type="text" id="roomIdInput" placeholder="新規の場合は任意の4桁" maxlength="4">
+  <button class="btn-primary" onclick="enterRoom()">入室</button>
+</div>
+
+<div id="name" class="screen">
+  <h1>ito</h1>
+  <div class="info-box">部屋ID: <strong id="displayRoomId1"></strong></div>
+  <label>名前を入力</label>
+  <input type="text" id="nameInput" placeholder="あなたの名前">
+  <button class="btn-primary" onclick="setName()">確定</button>
+</div>
+
+<div id="waiting" class="screen">
+  <h1>ito</h1>
+  <div class="info-box">部屋ID: <strong id="displayRoomId2"></strong></div>
+  <h2>参加者 (<span id="playerCount">0</span>人)</h2>
+  <div id="playerList"></div>
+  <div id="hostBtn" style="display:none;">
+    <button class="btn-primary" onclick="goToTitle()">ゲーム設定へ</button>
+  </div>
+</div>
+
+<div id="title" class="screen">
+  <h1>ito</h1>
+  <label>お題</label>
+  <input type="text" id="themeInput" placeholder="動物の大きさ">
+  <label>ハート数</label>
+  <select id="heartSelect">
+    <option value="1">❤️ 1</option>
+    <option value="2">❤️ 2</option>
+    <option value="3" selected>❤️ 3</option>
+    <option value="4">❤️ 4</option>
+    <option value="5">❤️ 5</option>
+  </select>
+  <div id="titleHostBtn" style="display:none;">
+    <button class="btn-primary" onclick="startGame()">ゲーム開始</button>
+  </div>
+  <div id="titleWait" style="display:none;">
+    <div class="wait-message">ホストが設定中、少し待ってね</div>
+  </div>
+</div>
+
+<div id="answering" class="screen">
+  <h1>ito</h1>
+  <div class="theme-display"><strong id="themeAnswering"></strong></div>
+  <div class="my-card">
+    <div>あなたの数値</div>
+    <div class="my-card-number" id="myNumber">??</div>
+  </div>
+  <div id="answerSection">
+    <label>あなたの回答</label>
+    <textarea id="answerInput" placeholder="回答を入力"></textarea>
+    <button class="btn-primary" onclick="submitAnswer()">送信</button>
+  </div>
+  <div id="answerWait" style="display:none;">
+    <div class="wait-message">全員の回答を待っています...</div>
+  </div>
+  <div id="forceAnswer" style="display:none;">
+    <button class="btn-secondary" onclick="forceAnswer()">強制的に次へ</button>
+  </div>
+</div>
+
+<div id="opening" class="screen">
+  <h1>ito</h1>
+  <div class="hearts-container">
+    <div class="hearts-label">残りHP</div>
+    <div class="hearts" id="heartsOpening"></div>
+  </div>
+  <div class="theme-display"><strong id="themeOpening"></strong></div>
+  <div id="cardList"></div>
+</div>
+
+<div id="result" class="screen">
+  <h1>ito</h1>
+  <div class="result-message" id="resultMsg"></div>
+  <div class="info-box">
+    <div>お題: <strong id="resultTheme"></strong></div>
+    <div>残りHP: <strong id="resultHearts"></strong></div>
+  </div>
+  <h2>全員のカード</h2>
+  <div id="resultCards"></div>
+  <div id="resultBtns"></div>
+</div>
+
+<button class="fixed-back" id="backBtn" style="display:none;" onclick="showReturnDialog()">← 戻る</button>
+<button class="fixed-back" id="leaveBtn" style="display:none; bottom: 80px;" onclick="leaveRoom()">抜ける</button>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDwQilDL5jqQkXi05r7A85erZxqBo0SSSA",
+  authDomain: "ito-fee6d.firebaseapp.com",
+  databaseURL: "https://ito-fee6d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "ito-fee6d",
+  storageBucket: "ito-fee6d.firebasestorage.app",
+  messagingSenderId: "891719168888",
+  appId: "1:891719168888:web:905c7e956ed71a6aa78e8d",
+  measurementId: "G-NWKRHQGGJV"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let roomId = null;
+let myId = null;
+let isHost = false;
+let isOpeningCard = false;
+let disconnectRef = null;
+const ICONS = ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯'];
+
+function enterRoom() {
+  const input = document.getElementById('roomIdInput').value.trim();
+  if (input.length !== 4) { alert('4桁の部屋IDを入力してください'); return; }
+  roomId = input;
+  myId = 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2,9);
+  
+  db.ref('rooms/' + roomId).once('value').then(snap => {
+    if (!snap.exists()) {
+      db.ref('rooms/' + roomId).set({
+        gameData: { 
+          phase: 'waiting', 
+          theme: '', 
+          maxHearts: 3, 
+          currentHearts: 3, 
+          clearCount: 0, 
+          hostId: myId
+        },
+        players: {}
+      }).then(() => {
+        isHost = true;
+        showScreen('name');
+        document.getElementById('displayRoomId1').textContent = roomId;
+      });
+    } else {
+      const data = snap.val();
+      const players = data.players || {};
+      const hostId = data.gameData ? data.gameData.hostId : null;
+      
+      if (!hostId || !players[hostId]) {
+        alert('この部屋のホストが不在のため入室できません');
+        return;
+      }
+      
+      isHost = false;
+      showScreen('name');
+      document.getElementById('displayRoomId1').textContent = roomId;
+    }
+  });
+}
+
+function setName() {
+  const name = document.getElementById('nameInput').value.trim();
+  if (!name) { alert('名前を入力してください'); return; }
+  
+  db.ref('rooms/' + roomId + '/players').once('value').then(snap => {
+    const players = snap.val() || {};
+    if (Object.keys(players).length >= 8) { alert('満員です'); return; }
+    
+    const usedIcons = Object.values(players).map(p => p.icon);
+    const availableIcons = ICONS.filter(i => !usedIcons.includes(i));
+    if (availableIcons.length === 0) { alert('満員です'); return; }
+    const icon = availableIcons[Math.floor(Math.random() * availableIcons.length)];
+    
+    db.ref('rooms/' + roomId + '/players/' + myId).set({
+      id: myId,
+      name: name,
+      icon: icon,
+      number: null,
+      answer: '',
+      isOpen: false,
+      failCount: 0
+    }).then(() => {
+      setupDisconnectHandlers();
+      startSync();
+    });
+  });
+}
+
+function setupDisconnectHandlers() {
+  if (disconnectRef) {
+    disconnectRef.cancel();
+  }
+  
+  disconnectRef = db.ref('rooms/' + roomId + '/players/' + myId);
+  
+  if (isHost) {
+    db.ref('rooms/' + roomId).onDisconnect().remove();
+  } else {
+    disconnectRef.onDisconnect().remove();
+  }
+}
+
+function startSync() {
+  db.ref('rooms/' + roomId).on('value', snap => {
+    const room = snap.val();
+    if (!room) { 
+      alert('ホストが退出したため部屋は解散しました'); 
+      leaveRoomCompletely();
+      return; 
+    }
+    
+    if (!room.players || !room.players[myId]) {
+      alert('追放されました');
+      leaveRoomCompletely();
+      return;
+    }
+    
+    const gameData = room.gameData || {};
+    const players = room.players || {};
+    
+    if (!gameData.hostId || !players[gameData.hostId]) {
+      if (isHost) {
+        alert('エラーが発生しました');
+        leaveRoomCompletely();
+      } else {
+        alert('ホストが退出したため部屋は解散しました');
+        leaveRoomCompletely();
+      }
+      return;
+    }
+    
+    if (Object.keys(players).length === 0) {
+      db.ref('rooms/' + roomId).remove();
+      return;
+    }
+    
+    document.getElementById('displayRoomId2').textContent = roomId;
+    
+    const phase = gameData.phase || 'waiting';
+    showScreen(phase);
+    
+    if (phase === 'waiting') {
+      renderPlayerList(players, gameData.hostId);
+      document.getElementById('hostBtn').style.display = (gameData.hostId === myId) ? 'block' : 'none';
+    }
+    
+    if (phase === 'title') {
+      document.getElementById('titleHostBtn').style.display = (gameData.hostId === myId) ? 'block' : 'none';
+      document.getElementById('titleWait').style.display = (gameData.hostId === myId) ? 'none' : 'block';
+    }
+    
+    if (phase === 'answering') {
+      document.getElementById('themeAnswering').textContent = gameData.theme || '';
+      const myPlayer = players[myId];
+      if (myPlayer) {
+        document.getElementById('myNumber').textContent = myPlayer.number || '??';
+        if (!myPlayer.answer || myPlayer.answer === '') {
+          document.getElementById('answerSection').style.display = 'block';
+          document.getElementById('answerWait').style.display = 'none';
+        } else {
+          document.getElementById('answerSection').style.display = 'none';
+          document.getElementById('answerWait').style.display = 'block';
+        }
+      }
+      
+      const allAnswered = Object.values(players).every(p => p.answer && p.answer !== '');
+      if (allAnswered) {
+        document.getElementById('forceAnswer').style.display = 'none';
+      } else {
+        document.getElementById('forceAnswer').style.display = (gameData.hostId === myId) ? 'block' : 'none';
+      }
+    }
+    
+    if (phase === 'opening') {
+      document.getElementById('themeOpening').textContent = gameData.theme || '';
+      renderHearts('heartsOpening', gameData.currentHearts, gameData.maxHearts);
+      renderCardList(players);
+      
+      const allOpened = Object.values(players).every(p => p.isOpen);
+      if (allOpened) {
+        db.ref('rooms/' + roomId + '/gameData/phase').set('result');
+      }
+    }
+    
+    if (phase === 'result') {
+      renderResult(players, gameData);
+    }
+    
+    document.getElementById('backBtn').style.display = (phase !== 'name' && phase !== 'enter' && isHost) ? 'block' : 'none';
+    document.getElementById('leaveBtn').style.display = (phase !== 'name' && phase !== 'enter') ? 'block' : 'none';
+  });
+}
+
+function renderPlayerList(players, hostId) {
+  const list = document.getElementById('playerList');
+  list.innerHTML = '';
+  const arr = Object.values(players);
+  document.getElementById('playerCount').textContent = arr.length;
+  arr.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'player-item';
+    div.innerHTML = `
+      <div>
+        <span class="player-icon">${p.icon}</span>
+        <span>${p.name}</span>
+        ${p.id === hostId ? '<span class="host-badge">ホスト</span>' : ''}
+      </div>
+    `;
+    if (hostId === myId && p.id !== myId) {
+      div.onclick = () => kickPlayer(p.id, p.name);
+    }
+    list.appendChild(div);
+  });
+}
+
+function kickPlayer(pid, pname) {
+  if (!isHost) return;
+  if (confirm(`${pname} を追放しますか？`)) {
+    db.ref('rooms/' + roomId + '/players/' + pid).remove();
+  }
+}
+
+function renderHearts(elId, current, max) {
+  let html = '';
+  for (let i = 0; i < current; i++) html += '❤️';
+  for (let i = current; i < max; i++) html += '🖤';
+  document.getElementById(elId).innerHTML = html;
+}
+
+function renderCardList(players) {
+  const list = document.getElementById('cardList');
+  list.innerHTML = '';
+  const arr = Object.values(players);
+  
+  arr.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'opening-card-row';
+    
+    const leftDiv = document.createElement('div');
+    leftDiv.className = 'opening-card-left';
+    leftDiv.innerHTML = `<span class="player-icon">${p.icon}</span><span>${p.name}</span>`;
+    
+    const centerDiv = document.createElement('div');
+    centerDiv.className = 'opening-card-center';
+    centerDiv.textContent = p.answer || '';
+    
+    const rightDiv = document.createElement('div');
+    rightDiv.className = 'opening-card-right';
+    
+    if (p.isOpen) {
+      rightDiv.innerHTML = `<div class="number-display">${p.number}</div>`;
+    } else {
+      const btn = document.createElement('button');
+      btn.className = 'question-btn';
+      btn.textContent = '?';
+      btn.onclick = () => openCard(p.id);
+      rightDiv.appendChild(btn);
+    }
+    
+    div.appendChild(leftDiv);
+    div.appendChild(centerDiv);
+    div.appendChild(rightDiv);
+    list.appendChild(div);
+  });
+}
+
+function renderResult(players, gameData) {
+  document.getElementById('resultTheme').textContent = gameData.theme || '';
+  document.getElementById('resultHearts').textContent = gameData.currentHearts;
+  
+  const isSuccess = gameData.currentHearts > 0;
+  const msg = document.getElementById('resultMsg');
+  
+  if (gameData.clearCount >= 3) {
+    msg.textContent = 'クリア!🎉';
+    msg.className = 'result-message clear';
+  } else if (isSuccess) {
+    msg.textContent = '成功!';
+    msg.className = 'result-message clear';
+  } else {
+    msg.textContent = '失敗';
+    msg.className = 'result-message fail';
+  }
+  
+  const list = document.getElementById('resultCards');
+  list.innerHTML = '';
+  const arr = Object.values(players);
+  
+  arr.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'card-item';
+    div.innerHTML = `
+      <div class="card-info">
+        <div><span class="player-icon">${p.icon}</span><span>${p.name}</span></div>
+        <div class="card-number">${p.number}</div>
+        <div class="card-answer">${p.answer}</div>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+  
+  const btns = document.getElementById('resultBtns');
+  btns.innerHTML = '';
+  
+  if (gameData.hostId === myId) {
+    if (gameData.clearCount >= 3) {
+      btns.innerHTML = '<h2 style="text-align:center;color:#4caf50;margin:20px 0;">最終クリア!</h2><button class="btn-primary" onclick="backToTitle()">タイトルへ</button>';
+    } else if (isSuccess) {
+      btns.innerHTML = '<button class="btn-primary" onclick="nextRound()">次の回へ</button>';
+    } else {
+      btns.innerHTML = '<button class="btn-primary" onclick="backToTitle()">タイトルへ</button>';
+    }
+  }
+}
+
+function goToTitle() {
+  if (!isHost) return;
+  db.ref('rooms/' + roomId + '/players').once('value').then(snap => {
+    const players = snap.val() || {};
+    if (Object.keys(players).length < 3) {
+      alert('3人以上必要です');
+      return;
+    }
+    db.ref('rooms/' + roomId + '/gameData/phase').set('title');
+  });
+}
+
+function startGame() {
+  if (!isHost) return;
+  const theme = document.getElementById('themeInput').value.trim();
+  if (!theme) { alert('お題を入力してください'); return; }
+  const maxHearts = parseInt(document.getElementById('heartSelect').value);
+  
+  db.ref('rooms/' + roomId + '/gameData').update({
+    theme: theme,
+    maxHearts: maxHearts,
+    currentHearts: maxHearts,
+    phase: 'answering'
+  });
+  
+  db.ref('rooms/' + roomId + '/players').once('value').then(snap => {
+    const players = snap.val() || {};
+    const usedNumbers = new Set();
+    Object.keys(players).forEach(pid => {
+      let num;
+      do { num = Math.floor(Math.random() * 100) + 1; } while (usedNumbers.has(num));
+      usedNumbers.add(num);
+      db.ref('rooms/' + roomId + '/players/' + pid).update({
+        number: num,
+        answer: '',
+        isOpen: false,
+        failCount: 0
+      });
+    });
+  });
+}
+
+function submitAnswer() {
+  const answer = document.getElementById('answerInput').value.trim();
+  if (!answer) { alert('回答を入力してください'); return; }
+  db.ref('rooms/' + roomId + '/players/' + myId + '/answer').set(answer).then(() => {
+    checkAllAnswered();
+  });
+}
+
+function checkAllAnswered() {
+  db.ref('rooms/' + roomId + '/players').once('value').then(snap => {
+    const players = snap.val() || {};
+    const all = Object.values(players).every(p => p.answer && p.answer !== '');
+    if (all) {
+      db.ref('rooms/' + roomId + '/gameData/phase').set('opening');
+    }
+  });
+}
+
+function forceAnswer() {
+  if (!isHost) return;
+  if (!confirm('未回答者がいますが次へ進みますか?')) return;
+  db.ref('rooms/' + roomId + '/players').once('value').then(snap => {
+    const players = snap.val() || {};
+    Object.keys(players).forEach(pid => {
+      if (!players[pid].answer || players[pid].answer === '') {
+        db.ref('rooms/' + roomId + '/players/' + pid + '/answer').set('(未回答)');
+      }
+    });
+    db.ref('rooms/' + roomId + '/gameData/phase').set('opening');
+  });
+}
+
+function openCard(pid) {
+  if (isOpeningCard) return;
+  isOpeningCard = true;
+  
+  db.ref('rooms/' + roomId + '/players/' + pid).once('value').then(snap => {
+    const p = snap.val();
+    if (!p || p.isOpen) {
+      isOpeningCard = false;
+      return;
+    }
+    
+    db.ref('rooms/' + roomId + '/players').once('value').then(allSnap => {
+      const allPlayers = allSnap.val() || {};
+      
+      // 未公開カードのみを取得
+      const unopenedPlayers = Object.values(allPlayers).filter(pl => !pl.isOpen && pl.id !== pid);
+      
+      // 今開こうとしているカードより小さい数字を持つ未公開カードの枚数
+      let heartDeduction = 0;
+      unopenedPlayers.forEach(unopenedPlayer => {
+        if (unopenedPlayer.number < p.number) {
+          heartDeduction++;
+        }
+      });
+      
+      db.ref('rooms/' + roomId + '/players/' + pid).update({
+        isOpen: true,
+        failCount: heartDeduction
+      }).then(() => {
+        if (heartDeduction > 0) {
+          db.ref('rooms/' + roomId + '/gameData/currentHearts').once('value').then(hSnap => {
+            const currentHearts = hSnap.val() || 0;
+            const newHearts = Math.max(0, currentHearts - heartDeduction);
+            db.ref('rooms/' + roomId + '/gameData/currentHearts').set(newHearts).then(() => {
+              isOpeningCard = false;
+            });
+          });
+        } else {
+          isOpeningCard = false;
+        }
+      });
+    });
+  });
+}
+
+function nextRound() {
+  if (!isHost) return;
+  db.ref('rooms/' + roomId + '/gameData').once('value').then(snap => {
+    const gd = snap.val() || {};
+    db.ref('rooms/' + roomId + '/gameData').update({
+      phase: 'title',
+      theme: '',
+      clearCount: (gd.clearCount || 0) + 1
+    });
+  });
+  db.ref('rooms/' + roomId + '/players').once('value').then(snap => {
+    const players = snap.val() || {};
+    Object.keys(players).forEach(pid => {
+      db.ref('rooms/' + roomId + '/players/' + pid).update({
+        number: null,
+        answer: '',
+        isOpen: false,
+        failCount: 0
+      });
+    });
+  });
+}
+
+function backToTitle() {
+  if (!isHost) return;
+  db.ref('rooms/' + roomId + '/gameData').update({
+    phase: 'title',
+    theme: '',
+    clearCount: 0,
+    currentHearts: 3,
+    maxHearts: 3
+  });
+  db.ref('rooms/' + roomId + '/players').once('value').then(snap => {
+    const players = snap.val() || {};
+    Object.keys(players).forEach(pid => {
+      db.ref('rooms/' + roomId + '/players/' + pid).update({
+        number: null,
+        answer: '',
+        isOpen: false,
+        failCount: 0
+      });
+    });
+  });
+}
+
+function backToWaiting() {
+  if (!isHost) return;
+  db.ref('rooms/' + roomId + '/gameData').update({
+    phase: 'waiting',
+    theme: '',
+    clearCount: 0,
+    currentHearts: 3,
+    maxHearts: 3
+  });
+  db.ref('rooms/' + roomId + '/players').once('value').then(snap => {
+    const players = snap.val() || {};
+    Object.keys(players).forEach(pid => {
+      db.ref('rooms/' + roomId + '/players/' + pid).update({
+        number: null,
+        answer: '',
+        isOpen: false,
+        failCount: 0
+      });
+    });
+  });
+}
+
+function showReturnDialog() {
+  if (!isHost) {
+    alert('ホストのみ操作できます');
+    return;
+  }
+  
+  const choice = prompt('1: タイトルに戻る\n2: 待機室に戻る\n3: キャンセル\n\n数字を入力してください (1-3)');
+  
+  if (choice === '1') {
+    backToTitle();
+  } else if (choice === '2') {
+    backToWaiting();
+  }
+}
+
+function leaveRoom() {
+  if (isHost) {
+    if (confirm('ホストが退出すると部屋は解散します。よろしいですか？')) {
+      if (disconnectRef) {
+        disconnectRef.onDisconnect().cancel();
+      }
+      db.ref('rooms/' + roomId).remove().then(() => {
+        leaveRoomCompletely();
+      });
+    }
+  } else {
+    if (confirm('部屋を抜けますか？')) {
+      if (disconnectRef) {
+        disconnectRef.onDisconnect().cancel();
+      }
+      db.ref('rooms/' + roomId + '/players/' + myId).remove().then(() => {
+        leaveRoomCompletely();
+      });
+    }
+  }
+}
+
+function leaveRoomCompletely() {
+  if (disconnectRef) {
+    disconnectRef.onDisconnect().cancel();
+    disconnectRef = null;
+  }
+  db.ref('rooms/' + roomId).off();
+  roomId = null;
+  myId = null;
+  isHost = false;
+  location.reload();
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const screen = document.getElementById(id);
+  if (screen) screen.classList.add('active');
+}
+</script>
+</body>
+</html>
